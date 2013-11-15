@@ -1,0 +1,5 @@
+opensoft_monkey_code:
+    resource: "@OpensoftMonkeyCodeBundle/Controller/"
+    type:     annotation
+    prefix:   /
+
