@@ -1,17 +1,29 @@
 <?php
 /**
- * This file is part of ONP.
+ * Copyright (c) 2013 Molchanov Ivan
  *
- * Copyright (c) 2013 Opensoft (http://opensoftdev.com)
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
  *
- * The unauthorized use of this code outside the boundaries of
- * Opensoft is prohibited.
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 namespace Opensoft\MonkeyCodeBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
-use Exception;
 use Symfony\Component\Security\Core\Role\Role;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -22,16 +34,8 @@ use Symfony\Component\Security\Core\User\UserInterface;
  *
  * @author Ivan Molchanov <ivan.molchanov@opensoftdev.ru>
  */
-class User implements UserInterface
+class User extends BaseEntity implements UserInterface
 {
-    /**
-     * @ORM\Id()
-     * @ORM\Column(type="integer")
-     * @ORM\GeneratedValue(strategy="AUTO")
-     *
-     * @var integer
-     */
-    protected $id;
 
     /**
      * @ORM\Column(type="string")
@@ -83,38 +87,18 @@ class User implements UserInterface
     protected $lastName;
 
     /**
-     * @param string $name
-     * @param array $arguments
-     * @return mixed
-     * @throws \Exception
+     * @ORM\OneToMany(targetEntity="Opensoft\MonkeyCodeBundle\Entity\Message", mappedBy="user", cascade={"all"})
+     *
+     * @var ArrayCollection|Message[]
      */
-    public function __call($name, $arguments = [])
-    {
-        $type = substr($name, 0, 3);
-        $name = strtolower(substr($name, 3, strlen($name)));
-        if($type === 'get') {
-            $reflection = new \ReflectionClass($this);
-            if (!$reflection->hasProperty($name)) {
-                throw new Exception('Unknown property');
-            }
-            return $reflection->getProperty($name)->getValue($this);
-        } else if($type === 'set') {
-            if (count($arguments) > 1) {
-                throw new Exception('Only one argument is possible for this function');
-            }
-            $reflection = new \ReflectionClass($this);
-            if (!$reflection->hasProperty($name)) {
-                throw new Exception('Unknown property');
-            }
-            $property = $reflection->getProperty($name);
-            $property->setAccessible(true);
-            $property->setValue($this, $arguments[0]);
-            $property->setAccessible(false);
+    protected $messages;
 
-            return $this;
-        } else {
-            throw new Exception('Unknown function');
-        }
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->messages = new ArrayCollection();
     }
 
     /**
@@ -135,7 +119,7 @@ class User implements UserInterface
      */
     public function getRoles()
     {
-        return 'ROLE_USER';
+        return array('ROLE_USER');
     }
 
     /**
